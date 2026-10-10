@@ -1,0 +1,24 @@
+# Secrets: copy .env.example to .env and add your own key
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Node / Vite
+frontend/node_modules/
+frontend/dist/
+*.tsbuildinfo
+
+# Local tooling and temp files
+.claude/
+*.json.tmp
+output/*.corrupt-*.json
+.DS_Store
+Thumbs.db
+
+# Both databases ARE committed on purpose (data/campus_customs.db + data/campus_customs_new.db)

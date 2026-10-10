@@ -1,0 +1,140 @@
+{
+  "shop_date": "2026-08-31",
+  "model": "gpt-6-luna",
+  "starting_checking_balance": 3400.0,
+  "ending_checking_balance": 152.0,
+  "tickets": [
+    {
+      "id": 101,
+      "subject": "Bulldog tee",
+      "requester": "Tauhid Zaman",
+      "type": "customer_order",
+      "run_id": "run-20261008T195312Z-5cf7d5",
+      "final_status": "in_progress",
+      "outcome": "Tee was out of stock and the vendor was blocked by overdue invoice 501. With human approval, invoice 501 ($840) was paid and a prepaid restock order for 1 tee ($8) was placed, arriving 2026-09-05. Customer update saved as a draft. Left in progress until the tee arrives.",
+      "agent_contributions": {
+        "boss": "Read the ticket, sent the stock check to Inventory, then had Customer Service draft the customer update; set the ticket to in progress.",
+        "inventory": "Checked stock (0 in size S, short 1), found Bulldog Print Co blocked by invoice 501, and handed the payment and restock to Accounting.",
+        "accounting": "Checked all bills and cash, requested approval to pay invoice 501 and to place the $8 restock order, and carried out both.",
+        "customer_service": "Confirmed stock and the arrival date, then saved a draft update to Tauhid Zaman (not sent)."
+      },
+      "human_approvals": [
+        {
+          "approval_id": "b53cb3b2",
+          "kind": "payment",
+          "requested_by": "accounting",
+          "summary": "Pay invoice 501: $840.00 to Bulldog Print Co (due 2026-08-28, overdue)",
+          "amount": 840.0,
+          "payee": "Bulldog Print Co",
+          "approved": true,
+          "approved_by": "Emily",
+          "requested_at": "2026-10-08T19:53:17.167+00:00",
+          "decided_at": "2026-10-08T20:04:20.088+00:00"
+        },
+        {
+          "approval_id": "486c41db",
+          "kind": "purchase_order",
+          "requested_by": "accounting",
+          "summary": "Prepaid restock order: 1 x CC-TEE-WHITE size S from vendor 1 (Bulldog Print Co) at $8.00 each",
+          "amount": 8.0,
+          "payee": "Bulldog Print Co",
+          "approved": true,
+          "approved_by": "Emily",
+          "requested_at": "2026-10-08T20:04:27.229+00:00",
+          "decided_at": "2026-10-08T20:04:35.798+00:00"
+        }
+      ],
+      "usage": {
+        "requests": 15,
+        "tool_calls": 12,
+        "input_tokens": 35314,
+        "output_tokens": 2866,
+        "total_tokens": 38180
+      }
+    },
+    {
+      "id": 102,
+      "subject": "Rent due",
+      "requester": "Elm City Properties",
+      "type": "rent_notice",
+      "run_id": "run-20261008T200529Z-81ef24",
+      "final_status": "resolved",
+      "outcome": "With human approval, the $2,400 rent for the Chapel Street shop was paid; the lease's next due date moved to 2026-10-02. Landlord acknowledgment saved as a draft. Resolved.",
+      "agent_contributions": {
+        "boss": "Read the rent notice, checked payables, and sent Facilities and Accounting to work it in parallel; marked it resolved.",
+        "facilities": "Confirmed the $2,400 rent due 2026-09-02 against cash and other bills and saved a landlord acknowledgment draft (not sent).",
+        "accounting": "Confirmed cash covered the rent, requested human approval, and paid it (cash $2,552 to $152)."
+      },
+      "human_approvals": [
+        {
+          "approval_id": "97d1a95f",
+          "kind": "payment",
+          "requested_by": "accounting",
+          "summary": "Pay rent 1: $2,400.00 to Elm City Properties (due 2026-09-02, due in 2 days)",
+          "amount": 2400.0,
+          "payee": "Elm City Properties",
+          "approved": true,
+          "approved_by": "Emily",
+          "requested_at": "2026-10-08T20:05:31.781+00:00",
+          "decided_at": "2026-10-08T20:05:41.074+00:00"
+        }
+      ],
+      "usage": {
+        "requests": 8,
+        "tool_calls": 8,
+        "input_tokens": 18208,
+        "output_tokens": 1821,
+        "total_tokens": 20029
+      }
+    },
+    {
+      "id": 103,
+      "subject": "Bulk hoodie discount",
+      "requester": "Yale AI Club",
+      "type": "price_override",
+      "run_id": "run-20261008T200557Z-e52fb3",
+      "final_status": "blocked",
+      "outcome": "A 10% bulk discount ($52.20 each, 57.85% margin) was approved and recorded. 8 of 20 hoodies are in stock, but the 12-unit restock costs $264 and only $152 cash is left, so no purchase order was placed. Club reply saved as a draft. Blocked on cash.",
+      "agent_contributions": {
+        "boss": "Read the request, sent Inventory and Accounting (asking for a reasonable discount, not the max), then Customer Service; marked it blocked.",
+        "inventory": "Checked stock (8 of 20 in size M, short 12, $264 restock, 5-day lead) and handed the restock question to Accounting.",
+        "accounting": "Quoted the order, proposed a 10% discount (max allowed 36.78%), got human approval and recorded it, and held the $264 restock because cash is $152.",
+        "customer_service": "Saved a reply draft to the Yale AI Club with the approved price and current availability (not sent)."
+      },
+      "human_approvals": [
+        {
+          "approval_id": "8dcc5cd6",
+          "kind": "discount",
+          "requested_by": "accounting",
+          "summary": "Approve a 10% discount on CC-HOOD-NAVY for ticket 103",
+          "amount": null,
+          "payee": null,
+          "approved": true,
+          "approved_by": "Emily",
+          "requested_at": "2026-10-08T20:05:59.783+00:00",
+          "decided_at": "2026-10-08T20:07:03.548+00:00"
+        },
+        {
+          "approval_id": "312ef390",
+          "kind": "discount",
+          "requested_by": "accounting",
+          "summary": "Approve a 10% discount on CC-HOOD-NAVY for ticket 103",
+          "amount": null,
+          "payee": null,
+          "approved": true,
+          "approved_by": "Emily",
+          "requested_at": "2026-10-08T20:06:01.199+00:00",
+          "decided_at": "2026-10-08T20:07:04.911+00:00",
+          "note": "Duplicate of the request above: Boss and Inventory both handed the discount to Accounting at the same moment. Same 10%, no money moved; it only added a second note to the ticket."
+        }
+      ],
+      "usage": {
+        "requests": 19,
+        "tool_calls": 20,
+        "input_tokens": 51204,
+        "output_tokens": 5320,
+        "total_tokens": 56524
+      }
+    }
+  ]
+}

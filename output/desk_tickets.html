@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campus Customs: Desk Tickets</title>
+<style>
+  :root {
+    --bg: #1f2124;
+    --panel: #2a2d31;
+    --panel-2: #33373c;
+    --line: #3d4248;
+    --text: #e9eaec;
+    --muted: #9aa0a8;
+    --accent: #7aa7ff;
+    --accent-soft: rgba(122, 167, 255, 0.14);
+    --boss: #f2c46d;
+    --agent: #8fd3b6;
+    --tool: #c7a6ff;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); }
+  body {
+    font: 15px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 40px 24px 64px; }
+
+  header { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+  .logo {
+    width: 44px; height: 44px; border-radius: 12px; flex: none;
+    background: linear-gradient(135deg, #3b5ba8, #7aa7ff);
+    display: grid; place-items: center;
+    font: 700 15px/1 ui-monospace, "Cascadia Code", Consolas, monospace; letter-spacing: .5px; color: #fff;
+    box-shadow: 0 6px 18px rgba(122, 167, 255, 0.25);
+  }
+  h1 { font-size: 22px; margin: 0; letter-spacing: .2px; }
+  .sub { color: var(--muted); font-size: 13.5px; margin-top: 2px; }
+
+  /* Tabs */
+  .tabs {
+    display: flex; gap: 6px; padding: 6px; background: var(--panel);
+    border: 1px solid var(--line); border-radius: var(--radius); overflow-x: auto;
+  }
+  .tab {
+    appearance: none; border: 0; background: transparent; color: var(--muted);
+    font: 600 14px/1 inherit; font-family: inherit; padding: 11px 16px; border-radius: 10px;
+    cursor: pointer; white-space: nowrap; transition: background .15s, color .15s;
+  }
+  .tab:hover { color: var(--text); background: var(--panel-2); }
+  .tab[aria-selected="true"] { color: #fff; background: var(--accent-soft); box-shadow: inset 0 0 0 1px rgba(122,167,255,.45); }
+  .tab .num { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; color: var(--accent); margin-right: 6px; }
+  .tab.extra { margin-left: auto; }
+  .tab.extra + .tab.extra { margin-left: 0; }
+
+  .panel { display: none; margin-top: 22px; }
+  .panel.active { display: block; animation: fade .18s ease-out; }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  /* Ticket card */
+  .ticket {
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 22px 24px; margin-bottom: 18px;
+  }
+  .ticket-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .ticket h2 { margin: 0; font-size: 20px; }
+  .pill {
+    font: 600 12px/1 ui-monospace, "Cascadia Code", Consolas, monospace; text-transform: uppercase; letter-spacing: .6px;
+    padding: 6px 10px; border-radius: 999px; background: var(--panel-2); color: var(--muted); border: 1px solid var(--line);
+  }
+  .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px 20px; margin-top: 16px; }
+  .meta div { font-size: 13.5px; }
+  .meta dt { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .5px; }
+  .meta dd { margin: 2px 0 0; }
+  .quote {
+    margin-top: 16px; padding: 12px 14px; border-left: 3px solid var(--accent);
+    background: var(--panel-2); border-radius: 0 10px 10px 0; color: #d6d9dd; font-style: italic;
+  }
+
+  /* Sections */
+  .section {
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 20px 24px; margin-bottom: 18px;
+  }
+  .section h3 {
+    margin: 0 0 12px; font-size: 13px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section h3::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+  .section.actual h3::before { background: var(--agent); }
+  .section p { margin: 0 0 14px; }
+
+  .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 4px 0 16px; }
+  .node {
+    padding: 7px 12px; border-radius: 10px; font-weight: 600; font-size: 13.5px;
+    background: rgba(143, 211, 182, 0.12); color: var(--agent); border: 1px solid rgba(143, 211, 182, 0.35);
+  }
+  .node.boss { background: rgba(242, 196, 109, 0.12); color: var(--boss); border-color: rgba(242, 196, 109, 0.4); }
+  .node.human { background: rgba(255, 138, 138, 0.10); color: #ff9a9a; border-color: rgba(255, 138, 138, 0.35); }
+  .arrow { color: var(--muted); font-size: 14px; }
+
+  .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    font: 13px/1 ui-monospace, "Cascadia Code", Consolas, monospace; padding: 7px 10px; border-radius: 8px;
+    background: rgba(199, 166, 255, 0.10); color: var(--tool); border: 1px solid rgba(199, 166, 255, 0.3);
+  }
+
+  .blank {
+    min-height: 140px; border: 1.5px dashed var(--line); border-radius: 10px; background: rgba(255,255,255,0.015);
+  }
+  .blank.tall { min-height: 320px; }
+
+
+  .actual-body p { margin: 0 0 14px; }
+  .status { margin-left: 6px; font: 700 12px/1 ui-monospace, "Cascadia Code", Consolas, monospace; letter-spacing: 1px;
+    padding: 5px 9px; border-radius: 6px; border: 1.5px solid currentColor; }
+  .st-resolved { color: #7cf08b; } .st-progress { color: #ffbf3f; } .st-blocked { color: #ff8a8a; }
+  .ledger { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .ledger th, .ledger td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .ledger th { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .6px; }
+  .ledger .num { text-align: right; white-space: nowrap; font-family: ui-monospace, "Cascadia Code", Consolas, monospace; }
+  .ledger .neg { color: #ff9a9a; }
+  .ledger tr.start td, .ledger tr.end td { font-weight: 700; }
+  .ledger tr.end td { border-top: 2px solid var(--line); border-bottom: 0; }
+  .check { margin-top: 16px; padding: 12px 14px; border-radius: 10px; font-size: 14px; }
+  .check.ok { background: rgba(124, 240, 139, .08); border: 1px solid rgba(124, 240, 139, .4); }
+  .check.bad { background: rgba(255, 138, 138, .08); border: 1px solid rgba(255, 138, 138, .4); }
+  .check code { font-family: ui-monospace, Consolas, monospace; color: var(--tool); }
+
+  .rq { padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .rq:first-child { padding-top: 0; } .rq:last-child { border-bottom: 0; padding-bottom: 0; }
+  .rq h4 { margin: 0 0 10px; font-size: 15.5px; display: flex; gap: 10px; align-items: baseline; }
+  .qn { flex: none; width: 24px; height: 24px; border-radius: 50%; display: inline-grid; place-items: center;
+    background: var(--accent-soft); color: var(--accent); font-size: 12.5px; }
+  .ra { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; margin: 0 0 8px 34px; }
+  .ra p { margin: 0; flex: 1 1 420px; color: #d6d9dd; }
+  .rtag { font: 600 12px/1 ui-monospace, "Cascadia Code", Consolas, monospace; color: var(--accent);
+    padding: 4px 7px; border-radius: 6px; background: var(--panel-2); border: 1px solid var(--line); }
+  .stars { color: var(--boss); font-size: 13px; white-space: nowrap; }
+  footer { color: var(--muted); font-size: 12.5px; margin-top: 28px; text-align: center; }
+  @media (max-width: 640px) { .tab.extra { margin-left: 0; } .wrap { padding: 24px 14px 48px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo" aria-hidden="true">CC</div>
+    <div>
+      <h1>Campus Customs: Desk Tickets</h1>
+      <div class="sub">Shop date 2026-08-31 · Plan (Expected) vs. what the agent team did (Actual)</div>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Tickets">
+    <button class="tab" role="tab" id="tab-101" aria-controls="t101" data-tab="t101"><span class="num">101</span>Bulldog tee</button>
+    <button class="tab" role="tab" id="tab-102" aria-controls="t102" data-tab="t102"><span class="num">102</span>Rent due</button>
+    <button class="tab" role="tab" id="tab-103" aria-controls="t103" data-tab="t103"><span class="num">103</span>Bulk hoodie discount</button>
+    <button class="tab extra" role="tab" id="tab-cash" aria-controls="cash" data-tab="cash">Cash</button>
+    <button class="tab extra" role="tab" id="tab-reflection" aria-controls="reflection" data-tab="reflection">Reflection</button>
+  </nav>
+
+  <!-- ===================== Ticket 101 ===================== -->
+  <section class="panel" id="t101" role="tabpanel" aria-labelledby="tab-101">
+    <div class="ticket">
+      <div class="ticket-top">
+        <h2>Ticket 101: Bulldog tee</h2>
+        <span class="pill">customer_order</span>
+      </div>
+      <dl class="meta">
+        <div><dt>Requester</dt><dd>Tauhid Zaman</dd></div>
+        <div><dt>Item</dt><dd>CC-TEE-WHITE · size S · qty 1</dd></div>
+        <div><dt>Linked</dt><dd>Invoice 501</dd></div>
+        <div><dt>Created</dt><dd>2026-08-31 09:15</dd></div>
+      </dl>
+      <div class="quote">“Needs a tee in size S.”</div>
+    </div>
+
+    <div class="section expected">
+      <h3>Expected</h3>
+      <div class="flow" aria-label="Agent flow">
+        <span class="node boss">Boss</span><span class="arrow">→</span>
+        <span class="node">Inventory</span><span class="arrow">+</span>
+        <span class="node">Accounting</span><span class="arrow">→</span>
+        <span class="node">Customer Service</span>
+      </div>
+      <p>Boss should read the ticket and then delegate to Inventory and Accounting to resolve, before pulling in Customer Service to let the customer know what the next steps are.</p>
+      <div class="label">Tools</div>
+      <div class="chips">
+        <span class="chip">get_tickets</span><span class="chip">check_restock</span><span class="chip">manage_payables</span>
+        <span class="chip">place_purchase_order</span><span class="chip">save_draft</span><span class="chip">update_ticket</span>
+      </div>
+    </div>
+
+    <div class="section actual">
+      <h3>Actual</h3>
+      <div class="actual-body" id="t101-actual">
+        <div class="flow" aria-label="Agent flow"><span class="node boss">Boss</span><span class="arrow">→</span><span class="node ">Inventory</span><span class="arrow">→</span><span class="node ">Accounting</span><span class="arrow">→</span><span class="node human">Human approval ×2</span><span class="arrow">→</span><span class="node ">Customer Service</span><span class="status st-progress">IN PROGRESS</span></div>
+        <p>Boss delegated the stock check to Inventory, which found 0 tees in size S and Bulldog Print Co blocked by overdue invoice 501, so Inventory handed the payment and restock to Accounting. Accounting got human approval to pay invoice 501 ($840) and to place a prepaid restock order for 1 tee ($8, arrives 2026-09-05). Boss then had Customer Service save a draft update to Tauhid (not sent) and kept the ticket in progress until the tee arrives.</p>
+        <div class="label">Tools used</div>
+        <div class="chips"><span class="chip">get_tickets</span><span class="chip">check_restock</span><span class="chip">manage_payables</span><span class="chip">place_purchase_order</span><span class="chip">save_draft</span><span class="chip">update_ticket</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== Ticket 102 ===================== -->
+  <section class="panel" id="t102" role="tabpanel" aria-labelledby="tab-102">
+    <div class="ticket">
+      <div class="ticket-top">
+        <h2>Ticket 102: Rent due</h2>
+        <span class="pill">rent_notice</span>
+      </div>
+      <dl class="meta">
+        <div><dt>Requester</dt><dd>Elm City Properties</dd></div>
+        <div><dt>Space</dt><dd>Chapel Street shop</dd></div>
+        <div><dt>Linked</dt><dd>Lease 1</dd></div>
+        <div><dt>Created</dt><dd>2026-08-31 11:05</dd></div>
+      </dl>
+      <div class="quote">“Email: shop rent due in 2 days.”</div>
+    </div>
+
+    <div class="section expected">
+      <h3>Expected</h3>
+      <div class="flow" aria-label="Agent flow">
+        <span class="node boss">Boss</span><span class="arrow">→</span>
+        <span class="node">Accounting</span><span class="arrow">+</span>
+        <span class="node">Facilities</span><span class="arrow">→</span>
+        <span class="node human">Human approval</span>
+      </div>
+      <p>Boss should read the ticket and then ask Accounting and Facilities to help figure out the next steps for paying rent, but always asking/waiting for human approval with the solution since it deals with real money.</p>
+      <div class="label">Tools</div>
+      <div class="chips">
+        <span class="chip">get_tickets</span><span class="chip">manage_payables</span><span class="chip">update_ticket</span>
+      </div>
+    </div>
+
+    <div class="section actual">
+      <h3>Actual</h3>
+      <div class="actual-body" id="t102-actual">
+        <div class="flow" aria-label="Agent flow"><span class="node boss">Boss</span><span class="arrow">→</span><span class="node ">Facilities + Accounting</span><span class="arrow">→</span><span class="node human">Human approval</span><span class="status st-resolved">RESOLVED</span></div>
+        <p>Boss checked the bills and delegated to Facilities and Accounting in parallel. Facilities confirmed the $2,400 rent due 2026-09-02 and saved a landlord acknowledgment draft (not sent). Accounting confirmed cash covered it, waited for human approval, and paid it; the lease's next due date moved to 2026-10-02. Boss marked the ticket resolved.</p>
+        <div class="label">Tools used</div>
+        <div class="chips"><span class="chip">get_tickets</span><span class="chip">manage_payables</span><span class="chip">save_draft</span><span class="chip">update_ticket</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== Ticket 103 ===================== -->
+  <section class="panel" id="t103" role="tabpanel" aria-labelledby="tab-103">
+    <div class="ticket">
+      <div class="ticket-top">
+        <h2>Ticket 103: Bulk hoodie discount</h2>
+        <span class="pill">price_override</span>
+      </div>
+      <dl class="meta">
+        <div><dt>Requester</dt><dd>Yale AI Club</dd></div>
+        <div><dt>Item</dt><dd>CC-HOOD-NAVY · size M · qty 20</dd></div>
+        <div><dt>Linked</dt><dd>None</dd></div>
+        <div><dt>Created</dt><dd>2026-08-31 16:55</dd></div>
+      </dl>
+      <div class="quote">“Student org wants 20 hoodies, size M, asking for a bulk discount.”</div>
+    </div>
+
+    <div class="section expected">
+      <h3>Expected</h3>
+      <div class="flow" aria-label="Agent flow">
+        <span class="node boss">Boss</span><span class="arrow">→</span>
+        <span class="node">Inventory</span><span class="arrow">+</span>
+        <span class="node">Accounting</span><span class="arrow">+</span>
+        <span class="node">Customer Service</span>
+      </div>
+      <p>Boss should read the ticket and then get Inventory, Accounting, and Customer Service to work together to figure out the restock needed, the right discount amount, and a drafted message for the Yale AI Club with the results.</p>
+      <div class="label">Tools</div>
+      <div class="chips">
+        <span class="chip">get_tickets</span><span class="chip">check_restock</span><span class="chip">quote_bulk_order</span>
+        <span class="chip">place_purchase_order</span><span class="chip">record_discount</span><span class="chip">save_draft</span>
+        <span class="chip">update_ticket</span>
+      </div>
+    </div>
+
+    <div class="section actual">
+      <h3>Actual</h3>
+      <div class="actual-body" id="t103-actual">
+        <div class="flow" aria-label="Agent flow"><span class="node boss">Boss</span><span class="arrow">→</span><span class="node ">Inventory + Accounting</span><span class="arrow">→</span><span class="node human">Human approval</span><span class="arrow">→</span><span class="node ">Customer Service</span><span class="status st-blocked">BLOCKED</span></div>
+        <p>Boss delegated to Inventory (8 of 20 hoodies in stock, short 12, $264 restock) and to Accounting, which quoted the order, proposed a 10% discount ($52.20 each, 57.85% margin; max allowed 36.78%), and recorded it after human approval. Accounting held the $264 restock because only $152 cash was left, so no purchase order was placed. Customer Service saved a reply draft for the Yale AI Club (not sent). Boss marked it blocked on cash.</p>
+        <div class="label">Tools used</div>
+        <div class="chips"><span class="chip">get_tickets</span><span class="chip">check_restock</span><span class="chip">quote_bulk_order</span><span class="chip">manage_payables</span><span class="chip">record_discount</span><span class="chip">save_draft</span><span class="chip">update_ticket</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== Cash ===================== -->
+  <section class="panel" id="cash" role="tabpanel" aria-labelledby="tab-cash">
+    <div class="section">
+      <h3>Cash</h3>
+      <div class="cash-body" id="cash-content">
+        <table class="ledger">
+          <thead><tr><th>Step</th><th>What moved</th><th class="num">Change</th><th class="num">Checking</th></tr></thead>
+          <tbody>
+            <tr class="start"><td>Start</td><td>Opening balance (cash_accounts, after reset)</td><td class="num">—</td><td class="num">$3,400.00</td></tr>
+            <tr><td>Ticket 101 finished</td><td>Paid overdue invoice 501 to Bulldog Print Co ($840.00) + prepaid restock order for 1 tee ($8.00), both human-approved</td><td class="num neg">−$848.00</td><td class="num">$2,552.00</td></tr>
+            <tr><td>Ticket 102 resolved</td><td>Paid Chapel Street rent to Elm City Properties, human-approved</td><td class="num neg">−$2,400.00</td><td class="num">$152.00</td></tr>
+            <tr><td>Ticket 103 finished</td><td>10% discount approved (no cash moves); $264 hoodie restock not ordered because cash was too low</td><td class="num">$0.00</td><td class="num">$152.00</td></tr>
+            <tr class="end"><td>End</td><td>Ending checking balance</td><td class="num neg">−$3,248.00</td><td class="num">$152.00</td></tr>
+          </tbody>
+        </table>
+        <div class="check ok">
+          <b>Database check:</b> <code>cash_accounts</code> checking balance = <b>$152.00</b>.
+          Matches the ledger ending balance of $152.00.
+          The <code>payments</code> table has 3 rows totaling $3,248.00 ($840 + $8 + $2,400), all approved by Emily.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== Reflection ===================== -->
+  <section class="panel" id="reflection" role="tabpanel" aria-labelledby="tab-reflection">
+    <div class="section">
+      <h3>Reflection</h3>
+      <div class="reflection-body" id="reflection-content">
+        <div class="rq">
+          <h4><span class="qn">1</span>How would you evaluate the performance of the agents on each ticket and why?</h4>
+          <div class="ra"><span class="rtag">101</span><span class="stars">★★★½☆ 3.5/5</span><p>3.5/5 stars, overall it made good decisions but there was a lot of logistical overhead and approval needed. Inventory correctly identified that there were 0 tees in stock and that the vendor was blocked by an invoice, and then Accounting asked me for two different approvals. Boss correctly kept the ticket open since the tee won&#x27;t arrive yet.</p></div>
+          <div class="ra"><span class="rtag">102</span><span class="stars">★★★★☆ 4/5</span><p>4/5 stars, the agent team performed really well. Boss delegated to Facilities and Accounting accurately, and asked for human approval when needed.</p></div>
+          <div class="ra"><span class="rtag">103</span><span class="stars">★★★☆☆ 3/5</span><p>3/5 stars, Accounting correctly refused the restock because there wasn&#x27;t enough cash left but there was a duplicate discount approval bug. In the future, a second identical request should be handled after waiting for the initial request to be resolved.</p></div>
+        </div>
+        <div class="rq">
+          <h4><span class="qn">2</span>For each ticket, how did Actual compare to the Expected plan you wrote earlier?</h4>
+          <div class="ra"><span class="rtag">101</span><p>Inventory delegated to Accounting itself.</p></div>
+          <div class="ra"><span class="rtag">102</span><p>No major differences, other than the team using a save_draft tool that I didn&#x27;t account for.</p></div>
+          <div class="ra"><span class="rtag">103</span><p>Because of the lack of cash, the purchase order wasn&#x27;t placed. The record_discount was also used twice.</p></div>
+        </div>
+        <div class="rq">
+          <h4><span class="qn">3</span>What would have been simpler as one agent with tools - and why?</h4>
+          <div class="ra"><p>A single agent would have seen the entire cash tab at once, in comparison to an agent team that is making its own calls and running in parallel with other agents. Less tokens would have been used, there would be no duplicate errors, and one agent might have been able to weigh the restock for ticket 103 before spending cash on 101 and 102.</p></div>
+        </div>
+        <div class="rq">
+          <h4><span class="qn">4</span>Describe three new problems Campus Customs might face that this agent team could solve with the tools you built.</h4>
+          <div class="ra"><span class="rtag">101</span><p>Communicating with Tauhid about when the restock will come and then subsequently resolving the ticket after 9/5</p></div>
+          <div class="ra"><span class="rtag">102</span><p>October rent will come up next month, so the agent team can assist with paying that again and/or drafting a rent extension request if there still isn&#x27;t enough cash yet</p></div>
+          <div class="ra"><span class="rtag">103</span><p>Communicating with the AI club that there are 8 hoodies currently in stock, and that they can do a partial order, and then later fulfilling the rest of the order after restocking and notifying the customers</p></div>
+        </div>
+        <div class="rq">
+          <h4><span class="qn">5</span>Describe three new problems Campus Customs might face that this agent team could not solve with the tools you built, and explain the tools and agents you would need to solve them</h4>
+          <div class="ra"><span class="rtag">1</span><p>There might be a new tool needed to automatically reopen tickets once certain barriers are overcome or removed. In this case, the ticket 101 will need to be reopened and resolved by the agent team after the restock delivery.</p></div>
+          <div class="ra"><span class="rtag">2</span><p>To communicate efficiently with customers, there could be a new tool for Customer Service to create tickets for the team based on customers&#x27; email replies. A human would need to send out the drafts that the agent makes, but the agent could read and create tickets from emails.</p></div>
+          <div class="ra"><span class="rtag">3</span><p>There needs to be a tool where the agent team can see the overall forecasted cash flow and propose a ranking or plan for how the open tickets should be handled. Human approval would be needed for the plan to be executed, but a forecast tool would have helped avoid what happened with ticket 103.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>Campus Customs agent team · gpt-6-luna · data from data/campus_customs_new.db via MCP</footer>
+</div>
+
+<script>
+  (function () {
+    var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+    function show(id, focus) {
+      tabs.forEach(function (t) {
+        var on = t.dataset.tab === id;
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        t.tabIndex = on ? 0 : -1;
+        document.getElementById(t.dataset.tab).classList.toggle('active', on);
+        if (on && focus) t.focus();
+      });
+      if (location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
+    }
+    tabs.forEach(function (t, i) {
+      t.addEventListener('click', function () { show(t.dataset.tab); });
+      t.addEventListener('keydown', function (e) {
+        var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+        if (d) { e.preventDefault(); show(tabs[(i + d + tabs.length) % tabs.length].dataset.tab, true); }
+      });
+    });
+    var start = location.hash.slice(1);
+    show(document.getElementById(start) ? start : 't101');
+  })();
+</script>
+</body>
+</html>
