@@ -233,3 +233,52 @@ _None yet._
 _None yet._
 
 **What the initial prompt lacked:** _TBD after any follow-up._
+
+## Problem 11: Submit to Github
+
+**Initial prompt:**
+> please push all of this code to a public github repo URL so that my graders can clone it, and then also put it into output/github_url.txt
+>
+> do not use the real .env. make sure both database files are included so that the grader can run the app easily. create a README that explains the original database needs to be copied to the working copy when you need a clean run, start MCP server, start fastAPI backend, start the React board, and reset the database before a full 3 ticket run.
+>
+> here's the file layout:
+>
+> ```
+> hw5/
+> ├── AI_prompts.md
+> ├── requirements.txt
+> ├── .env.example
+> ├── .gitignore
+> ├── .mcp.json
+> ├── README.md
+> ├── data/
+> │   ├── campus_customs.db
+> │   └── campus_customs_new.db
+> ├── mcp_server/
+> │   ├── server.py
+> │   └── README.md
+> ├── frontend/
+> ├── backend/
+> │   ├── main.py
+> │   ├── models.py
+> │   └── prompts/
+> │       ├── boss.md
+> │       ├── inventory.md
+> │       ├── accounting.md
+> │       ├── facilities.md
+> │       └── customer_service.md
+> └── output/
+>     ├── harness.md
+>     ├── mcp_smoke.json
+>     ├── desk_tickets.html
+>     ├── design.md
+>     ├── resolved_tickets.json
+>     ├── resolved_board.html
+>     ├── audit_trail.json
+>     └── github_url.txt
+> ```
+
+**Follow-up prompt:**
+_None yet._
+
+**What the initial prompt lacked:** _TBD after any follow-up._
